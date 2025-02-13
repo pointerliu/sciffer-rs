@@ -1,3 +1,6 @@
+use langchain_rust::llm::client::Ollama;
+use sciffer_rs::{extracters::topic::{TopicData, TopicExtracterBuilder}, fetchers::arxiv::ArxivFetcherBuilder, sciffer::ScifferBuilder};
+
 #[tokio::main]
 async fn main() {
     let fetcher = ArxivFetcherBuilder::default()
