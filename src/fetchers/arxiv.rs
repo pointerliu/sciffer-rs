@@ -2,8 +2,6 @@ use std::collections::HashMap;
 
 use arxiv::{ArxivQuery, ArxivQueryBuilder};
 use derive_builder::Builder;
-use serde::{Deserialize, Serialize};
-use serde_json::to_value;
 
 use super::{Fetcher, FetcherError};
 
@@ -67,11 +65,9 @@ impl ArxivFetcher {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-
     use crate::fetchers::Fetcher;
 
-    use super::{ArxivFetcher, ArxivFetcherBuilder};
+    use super::ArxivFetcherBuilder;
 
     #[tokio::test]
     async fn test_arxiv_fetcher() {

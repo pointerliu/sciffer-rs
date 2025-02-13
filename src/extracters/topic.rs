@@ -1,15 +1,14 @@
-use std::{collections::HashMap, error::Error, fmt::Debug, fs};
+use std::{collections::HashMap, fmt::Debug, fs};
 
 use derive_builder::Builder;
 use langchain_rust::{
-    chain::ChainError,
-    fmt_message, fmt_template,
+    fmt_template,
     language_models::llm::LLM,
     llm::client::Ollama,
     message_formatter,
     prompt::{FormatPrompter, HumanMessagePromptTemplate},
-    prompt_args,
-    schemas::Message,
+    prompt_args
+    ,
     template_fstring,
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};

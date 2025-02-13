@@ -4,12 +4,11 @@ use std::{
 };
 
 use derive_builder::Builder;
-use serde::{de::DeserializeOwned, ser::SerializeSeq, Deserialize, Serialize};
+use serde::de::DeserializeOwned;
 
 use crate::{
-    extracters::{topic::TopicData, Extracter},
+    extracters::Extracter,
     fetchers::{Fetcher, FetcherError},
-    tools::parser::parse_json_md,
 };
 
 #[derive(Debug)]
