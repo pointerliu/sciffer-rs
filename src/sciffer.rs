@@ -4,6 +4,7 @@ use std::{
 };
 
 use derive_builder::Builder;
+use futures::{stream::FuturesUnordered, StreamExt};
 use serde::de::DeserializeOwned;
 
 use crate::{
@@ -38,7 +39,7 @@ where
     F: Fetcher,
     E: Extracter,
 {
-    pub async fn sniffer<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    pub async fn sniffer_sequential<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
     where
         D: Debug + DeserializeOwned,
     {
@@ -53,6 +54,33 @@ where
         for ctx in fetched_data.iter() {
             let topic_data: D = self.extracter.extract(ctx).await?;
             res.push(topic_data);
+        }
+
+        Ok(res)
+    }
+
+    pub async fn sniffer_parallel<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    where
+        D: Debug + DeserializeOwned,
+    {
+        let fetched_data = self
+            .fetcher
+            .fetch()
+            .await
+            .map_err(|err| ScifferError::FetcherError(err))?;
+        // let extracted_data = fetched_data.into_iter().map(|ctx| async {}).collect();
+
+        let mut futures = FuturesUnordered::new();
+        for ctx in fetched_data.iter() {
+            let extracter = &self.extracter;
+            futures.push(async move {
+                extracter.extract(&ctx).await
+            });
+        }
+
+        let mut res = Vec::new();
+        while let Some(result) = futures.next().await {
+            res.push(result?);
         }
 
         Ok(res)
@@ -90,7 +118,7 @@ mod test {
             .build()
             .unwrap();
 
-        sciffer.sniffer::<TopicData>().await.unwrap()
+        sciffer.sniffer_parallel::<TopicData>().await.unwrap()
             .iter().for_each(|x| println!("{:?}", x));
     }
 }

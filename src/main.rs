@@ -32,6 +32,6 @@ async fn main() {
         .build()
         .unwrap();
 
-    sciffer.sniffer::<TopicData>().await.unwrap()
+    sciffer.sniffer_parallel::<TopicData>().await.unwrap()
         .iter().for_each(|x| println!("{:?}", x));
 }
