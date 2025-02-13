@@ -1,6 +1,16 @@
 [package]
-name = "jarvis"
+name = "sciffer-rs"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+serde = "*"
+rand = "*"
+serde_json = "1.0.138"
+langchain-rust = { version = "4.6.0", features = ["ollama"] }
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+arxiv-rs = "0.1.5"
+anyhow = "1.0.95"
+derive_builder = "0.20.2"
+regex = "1.11.1"
