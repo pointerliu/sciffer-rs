@@ -15,6 +15,7 @@ use crate::{
 #[derive(Debug)]
 enum ScifferError {
     FetcherError(FetcherError),
+    #[allow(dead_code)]
     ExtracterError,
 }
 

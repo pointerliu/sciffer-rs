@@ -4,6 +4,7 @@ pub mod arxiv;
 
 #[derive(Debug)]
 pub struct FetcherError {
+    #[allow(dead_code)]
     msg: String,
 }
 
