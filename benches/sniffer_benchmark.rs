@@ -1,7 +1,7 @@
 use std::{env, fmt::Debug};
 
 use async_openai::config::OPENAI_API_BASE;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use langchain_rust::llm::{OpenAI, OpenAIConfig};
 use sciffer_rs::{
     extracters::{
@@ -16,11 +16,13 @@ use sciffer_rs::{
 };
 use serde::de::DeserializeOwned;
 
+use tokio::runtime::Runtime;
+
 fn setup_sciffer() -> Sciffer<ArxivFetcher, TopicExtracter> {
     let _ = dotenv::dotenv();
     let fetcher = ArxivFetcherBuilder::default()
         .query("machine learning".to_string())
-        .number(10)
+        .number(3)
         .build()
         .unwrap();
 
@@ -58,8 +60,7 @@ where
         .unwrap()
         .iter()
         .for_each(|x| {
-            let t = black_box(32);
-            println!("{:?} {}", x, t)
+            println!("{:?}", x)
         });
 }
 
@@ -75,22 +76,25 @@ where
         .unwrap()
         .iter()
         .for_each(|x| {
-            let t = black_box(32);
-            println!("{:?} {}", x, t)
+            println!("{:?}", x)
         });
 }
 
 fn benchmark_sniffer(c: &mut Criterion) {
+    let mut group = c.benchmark_group("sciffer-process");
+    group.sample_size(10);
+    
     let sciffer = setup_sciffer();
 
-    c.bench_function("sniffer_parallel", |b| {
+    let runtime = Runtime::new().unwrap();
+    group.bench_function("sniffer_parallel", |b| {
         b.iter(|| {
-            sciffer_parallel::<_, _, TopicData>(&sciffer)
+            runtime.block_on(sciffer_parallel::<_, _, TopicData>(&sciffer));
         })
     });
-    c.bench_function("sniffer_sequential", |b| {
+    group.bench_function("sniffer_sequential", |b| {
         b.iter(|| {
-            sciffer_sequential::<_, _, TopicData>(&sciffer)
+            runtime.block_on(sciffer_sequential::<_, _, TopicData>(&sciffer));
         })
     });
 }
