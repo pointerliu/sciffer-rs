@@ -23,7 +23,10 @@ impl Display for ExtracterError {
 impl Error for ExtracterError {}
 
 pub trait Extracter {
-    fn extract<D>(&self, ctx: &HashMap<String, String>) -> impl std::future::Future<Output = Result<D, ExtracterError>> + Send
+    fn extract<D>(
+        &self,
+        ctx: &HashMap<String, String>,
+    ) -> impl std::future::Future<Output = Result<D, ExtracterError>> + Send
     where
         D: DeserializeOwned + Debug;
 }

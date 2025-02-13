@@ -14,5 +14,7 @@ impl From<String> for FetcherError {
 }
 
 pub trait Fetcher {
-    fn fetch(&self) -> impl std::future::Future<Output = Result<Vec<HashMap<String, String>>, FetcherError>> + Send;
+    fn fetch(
+        &self,
+    ) -> impl std::future::Future<Output = Result<Vec<HashMap<String, String>>, FetcherError>> + Send;
 }

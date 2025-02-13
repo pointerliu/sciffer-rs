@@ -73,9 +73,7 @@ where
         let mut futures = FuturesUnordered::new();
         for ctx in fetched_data.iter() {
             let extracter = &self.extracter;
-            futures.push(async move {
-                extracter.extract(&ctx).await
-            });
+            futures.push(async move { extracter.extract(&ctx).await });
         }
 
         let mut res = Vec::new();
@@ -118,7 +116,11 @@ mod test {
             .build()
             .unwrap();
 
-        sciffer.sniffer_parallel::<TopicData>().await.unwrap()
-            .iter().for_each(|x| println!("{:?}", x));
+        sciffer
+            .sniffer_parallel::<TopicData>()
+            .await
+            .unwrap()
+            .iter()
+            .for_each(|x| println!("{:?}", x));
     }
 }

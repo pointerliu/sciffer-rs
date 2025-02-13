@@ -1,7 +1,11 @@
 use async_openai::config::OPENAI_API_BASE;
 use langchain_rust::llm::OpenAI;
 use langchain_rust::tools::OpenAIConfig;
-use sciffer_rs::{extracters::topic::{TopicData, TopicExtracterBuilder}, fetchers::arxiv::ArxivFetcherBuilder, sciffer::ScifferBuilder};
+use sciffer_rs::{
+    extracters::topic::{TopicData, TopicExtracterBuilder},
+    fetchers::arxiv::ArxivFetcherBuilder,
+    sciffer::ScifferBuilder,
+};
 use std::env;
 
 #[tokio::main]
@@ -18,7 +22,7 @@ async fn main() {
         .with_config(
             OpenAIConfig::default()
                 .with_api_base(env::var("API_BASE").unwrap_or(OPENAI_API_BASE.to_string()))
-                .with_api_key(env::var("API_KEY").expect("Are you waiting for my API_KEY?"))
+                .with_api_key(env::var("API_KEY").expect("Are you waiting for my API_KEY?")),
         )
         .with_model("deepseek-ai/DeepSeek-R1-Distill-Qwen-7B");
     let extracter = TopicExtracterBuilder::default()
@@ -32,6 +36,10 @@ async fn main() {
         .build()
         .unwrap();
 
-    sciffer.sniffer_parallel::<TopicData>().await.unwrap()
-        .iter().for_each(|x| println!("{:?}", x));
+    sciffer
+        .sniffer_parallel::<TopicData>()
+        .await
+        .unwrap()
+        .iter()
+        .for_each(|x| println!("{:?}", x));
 }

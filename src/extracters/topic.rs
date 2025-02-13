@@ -7,9 +7,7 @@ use langchain_rust::{
     llm::client::Ollama,
     message_formatter,
     prompt::{FormatPrompter, HumanMessagePromptTemplate},
-    prompt_args
-    ,
-    template_fstring,
+    prompt_args, template_fstring,
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
