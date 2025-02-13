@@ -39,7 +39,7 @@ where
     F: Fetcher,
     E: Extracter,
 {
-    pub async fn sniffer<D>(&self) -> Result<(), Box<dyn std::error::Error>>
+    pub async fn sniffer<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
     where
         D: Debug + DeserializeOwned,
     {
@@ -48,15 +48,15 @@ where
             .fetch()
             .await
             .map_err(|err| ScifferError::FetcherError(err))?;
-
         // let extracted_data = fetched_data.into_iter().map(|ctx| async {}).collect();
 
+        let mut res: Vec<D> = vec![];
         for ctx in fetched_data.iter() {
             let topic_data: D = self.extracter.extract(ctx).await?;
-            println!("{:?}", topic_data)
+            res.push(topic_data);
         }
 
-        Ok(())
+        Ok(res)
     }
 }
 
@@ -65,14 +65,14 @@ mod test {
     use langchain_rust::llm::client::Ollama;
 
     use crate::{
-        extracters::topic::TopicExtracterBuilder,
-        fetchers::arxiv::{ArxivFetcher, ArxivFetcherBuilder},
+        extracters::topic::{TopicData, TopicExtracterBuilder},
+        fetchers::arxiv::ArxivFetcherBuilder,
     };
 
     use super::ScifferBuilder;
 
-    #[test]
-    fn test_sciffer() {
+    #[tokio::test]
+    async fn test_sciffer() {
         let fetcher = ArxivFetcherBuilder::default()
             .query("machine learning".to_string())
             .number(5)
@@ -90,5 +90,8 @@ mod test {
             .extracter(extracter)
             .build()
             .unwrap();
+
+        sciffer.sniffer::<TopicData>().await.unwrap()
+            .iter().for_each(|x| println!("{:?}", x));
     }
 }
