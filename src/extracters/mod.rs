@@ -1,4 +1,8 @@
-use std::{collections::HashMap, error::Error, fmt::{Debug, Display}};
+use std::{
+    collections::HashMap,
+    error::Error,
+    fmt::{Debug, Display},
+};
 
 use langchain_rust::chain::ChainError;
 use serde::de::DeserializeOwned;
