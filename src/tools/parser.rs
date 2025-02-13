@@ -8,7 +8,6 @@ pub fn parse_json_md(ctx: &str) -> Result<Value, Box<dyn StdError>> {
 
     if let Some(captures) = re.captures(ctx).or(re_raw.captures(ctx)) {
         let json_str = captures.get(1).unwrap().as_str();
-        println!("Extracted JSON from code block: {}", json_str);
         let parsed_json: Value = serde_json::from_str(json_str)?;
 
         if let Value::Object(_) = parsed_json {
