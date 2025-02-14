@@ -3,7 +3,8 @@ use clap::Parser;
 use langchain_rust::llm::OpenAI;
 use langchain_rust::tools::OpenAIConfig;
 use sciffer_rs::{
-    extracters::topic::{TopicData, TopicExtracterBuilder},
+    analyzers::simple::SimpleArixvTrendingAnalyzerBuilder,
+    extracters::topic::TopicExtracterBuilder,
     fetchers::arxiv::ArxivFetcherBuilder,
     sciffer::{ArxivScifferBuilder, Sniffer},
 };
@@ -42,21 +43,22 @@ async fn main() {
                 .with_api_key(env::var("API_KEY").expect("Are you waiting for my API_KEY?")),
         )
         .with_model(args.model);
+
     let extracter = TopicExtracterBuilder::default()
         .llm(Box::new(llm))
+        .build()
+        .unwrap();
+
+    let analyzer = SimpleArixvTrendingAnalyzerBuilder::default()
         .build()
         .unwrap();
 
     let sciffer = ArxivScifferBuilder::default()
         .fetcher(fetcher)
         .extracter(extracter)
+        .analyzer(analyzer)
         .build()
         .unwrap();
 
-    sciffer
-        .sniffer_parallel::<TopicData>()
-        .await
-        .unwrap()
-        .iter()
-        .for_each(|(x, d)| println!("arxiv-id: {:#?} topic: {:#?}", x.id, d));
+    sciffer.sniffer_parallel().await.unwrap();
 }
