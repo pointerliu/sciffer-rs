@@ -59,9 +59,7 @@ where
         .await
         .unwrap()
         .iter()
-        .for_each(|x| {
-            println!("{:?}", x)
-        });
+        .for_each(|x| println!("{:?}", x));
 }
 
 async fn sciffer_sequential<F, E, D>(sciffer: &Sciffer<F, E>)
@@ -75,15 +73,13 @@ where
         .await
         .unwrap()
         .iter()
-        .for_each(|x| {
-            println!("{:?}", x)
-        });
+        .for_each(|x| println!("{:?}", x));
 }
 
 fn benchmark_sniffer(c: &mut Criterion) {
     let mut group = c.benchmark_group("sciffer-process");
     group.sample_size(10);
-    
+
     let sciffer = setup_sciffer();
 
     let runtime = Runtime::new().unwrap();
