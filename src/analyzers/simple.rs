@@ -7,18 +7,18 @@ use crate::extracters::topic::TopicData;
 
 use super::TrendingAnalyzer;
 
-#[derive(Builder)]
+#[derive(Builder, Clone)]
 pub struct SimpleArixvTrendingAnalyzer {}
 
 impl TrendingAnalyzer for SimpleArixvTrendingAnalyzer {
     type Raw = Arxiv;
     type Ctx = TopicData;
 
-    fn problems(&self, data: Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
+    fn problems(&self, data: &Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
         let mut cnt: HashMap<String, Vec<Self::Raw>> = HashMap::new();
 
         for (raw, ctx) in data {
-            let problems = ctx.solved_problem;
+            let problems = ctx.solved_problem.clone();
             for problem in problems.iter() {
                 let entry = cnt.entry(problem.clone()).or_insert(Vec::new());
                 entry.push(raw.clone());
@@ -38,11 +38,11 @@ impl TrendingAnalyzer for SimpleArixvTrendingAnalyzer {
         sorted_problems
     }
 
-    fn techniques(&self, data: Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
+    fn techniques(&self, data: &Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
         todo!()
     }
 
-    fn fields(&self, data: Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
+    fn fields(&self, data: &Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
         todo!()
     }
 }
