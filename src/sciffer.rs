@@ -31,13 +31,13 @@ impl Display for ScifferError {
 impl Error for ScifferError {}
 
 pub trait Sniffer {
-    async fn sniffer_sequential<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    fn sniffer_sequential<D>(&self) -> impl std::future::Future<Output = Result<Vec<D>, Box<dyn std::error::Error>>> + Send
     where
-        D: Debug + DeserializeOwned;
+        D: Debug + DeserializeOwned + Send;
 
-    async fn sniffer_parallel<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    fn sniffer_parallel<D>(&self) -> impl std::future::Future<Output = Result<Vec<D>, Box<dyn std::error::Error>>> + Send
     where
-        D: Debug + DeserializeOwned;
+        D: Debug + DeserializeOwned + Send;
 }
 
 
@@ -49,12 +49,12 @@ pub struct ArxivSciffer<F, E> {
 
 impl<F, E> Sniffer for ArxivSciffer<F, E>
 where
-    F: Fetcher<Output = Arxiv>,
-    E: Extracter<Input = Arxiv>,
+    F: Fetcher<Output = Arxiv> + Sync,
+    E: Extracter<Input = Arxiv> + Sync,
 {
     async fn sniffer_sequential<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
     where
-        D: Debug + DeserializeOwned,
+        D: Debug + DeserializeOwned + Send,
     {
         let fetched_data = self
             .fetcher
@@ -74,7 +74,7 @@ where
 
     async fn sniffer_parallel<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
     where
-        D: Debug + DeserializeOwned,
+        D: Debug + DeserializeOwned + Send,
     {
         let fetched_data = self
             .fetcher

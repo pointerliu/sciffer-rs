@@ -83,8 +83,6 @@ pub struct TopicData {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-
     use arxiv::Arxiv;
     use langchain_rust::llm::client::Ollama;
 
