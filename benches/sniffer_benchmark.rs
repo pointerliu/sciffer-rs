@@ -1,5 +1,6 @@
 use std::{env, fmt::Debug};
 
+use arxiv::Arxiv;
 use async_openai::config::OPENAI_API_BASE;
 use criterion::{criterion_group, criterion_main, Criterion};
 use langchain_rust::llm::{OpenAI, OpenAIConfig};
@@ -11,14 +12,13 @@ use sciffer_rs::{
     fetchers::{
         arxiv::{ArxivFetcher, ArxivFetcherBuilder},
         Fetcher,
-    },
-    sciffer::{Sciffer, ScifferBuilder},
+    }, sciffer::{Sniffer, ArxivSciffer, ArxivScifferBuilder},
 };
 use serde::de::DeserializeOwned;
 
 use tokio::runtime::Runtime;
 
-fn setup_sciffer() -> Sciffer<ArxivFetcher, TopicExtracter> {
+fn setup_sciffer() -> ArxivSciffer<ArxivFetcher, TopicExtracter> {
     let _ = dotenv::dotenv();
     let fetcher = ArxivFetcherBuilder::default()
         .query("machine learning".to_string())
@@ -39,7 +39,7 @@ fn setup_sciffer() -> Sciffer<ArxivFetcher, TopicExtracter> {
         .build()
         .unwrap();
 
-    let sciffer = ScifferBuilder::default()
+    let sciffer = ArxivScifferBuilder::default()
         .fetcher(fetcher)
         .extracter(extracter)
         .build()
@@ -48,11 +48,11 @@ fn setup_sciffer() -> Sciffer<ArxivFetcher, TopicExtracter> {
     sciffer
 }
 
-async fn sciffer_parallel<F, E, D>(sciffer: &Sciffer<F, E>)
+async fn sciffer_parallel<F, E, D>(sciffer: &ArxivSciffer<F, E>)
 where
-    F: Fetcher,
-    E: Extracter,
-    D: Debug + DeserializeOwned,
+    F: Fetcher<Output = Arxiv> + Sync,
+    E: Extracter<Input = Arxiv> + Sync,
+    D: Debug + DeserializeOwned + Send,
 {
     sciffer
         .sniffer_parallel::<D>()
@@ -62,11 +62,11 @@ where
         .for_each(|x| println!("{:?}", x));
 }
 
-async fn sciffer_sequential<F, E, D>(sciffer: &Sciffer<F, E>)
+async fn sciffer_sequential<F, E, D>(sciffer: &ArxivSciffer<F, E>)
 where
-    F: Fetcher,
-    E: Extracter,
-    D: Debug + DeserializeOwned,
+    F: Fetcher<Output = Arxiv> + Sync,
+    E: Extracter<Input = Arxiv> + Sync,
+    D: Debug + DeserializeOwned + Send,
 {
     sciffer
         .sniffer_sequential::<D>()
