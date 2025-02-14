@@ -21,6 +21,7 @@ systemstat = "0.2.4"
 
 [dev-dependencies]
 criterion = {version = "0.5", features = ["async_futures"]}
+chrono = "*"
 
 [[bench]]
 name = "sniffer_benchmark"
