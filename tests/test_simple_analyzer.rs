@@ -85,7 +85,7 @@ fn trending_problems_round(cnt: i32) {
     let analyzer = SimpleArixvTrendingAnalyzerBuilder::default()
         .build()
         .unwrap();
-    let res = analyzer.problems(data);
+    let res = analyzer.problems(&data);
 
     // println!("{:#?}", res);
 
