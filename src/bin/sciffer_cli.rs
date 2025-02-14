@@ -15,7 +15,11 @@ struct Args {
     query: String,
     #[arg(short, long)]
     num: i32,
-    #[arg(short, long, default_value = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B")]
+    #[arg(
+        short,
+        long,
+        default_value = "deepseek-ai/DeepSeek-R1-Distill-Llama-7B"
+    )]
     model: String,
 }
 
