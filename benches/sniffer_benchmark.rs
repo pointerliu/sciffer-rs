@@ -12,7 +12,8 @@ use sciffer_rs::{
     fetchers::{
         arxiv::{ArxivFetcher, ArxivFetcherBuilder},
         Fetcher,
-    }, sciffer::{Sniffer, ArxivSciffer, ArxivScifferBuilder},
+    },
+    sciffer::{ArxivSciffer, ArxivScifferBuilder, Sniffer},
 };
 use serde::de::DeserializeOwned;
 
