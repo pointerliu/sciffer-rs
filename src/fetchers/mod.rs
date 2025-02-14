@@ -14,7 +14,7 @@ impl From<String> for FetcherError {
 
 pub trait Fetcher {
     type Output;
-    
+
     fn fetch(
         &self,
     ) -> impl std::future::Future<Output = Result<Vec<Self::Output>, FetcherError>> + Send;

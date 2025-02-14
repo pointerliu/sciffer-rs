@@ -1,4 +1,5 @@
 use async_openai::config::OPENAI_API_BASE;
+use clap::Parser;
 use langchain_rust::llm::OpenAI;
 use langchain_rust::tools::OpenAIConfig;
 use sciffer_rs::{
@@ -7,7 +8,6 @@ use sciffer_rs::{
     sciffer::{ArxivScifferBuilder, Sniffer},
 };
 use std::env;
-use clap::Parser;
 
 #[derive(Parser)]
 struct Args {
@@ -16,7 +16,7 @@ struct Args {
     #[arg(short, long)]
     num: i32,
     #[arg(short, long, default_value = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B")]
-    model: String
+    model: String,
 }
 
 #[tokio::main]

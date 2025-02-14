@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Debug, fs};
+use std::{fmt::Debug, fs};
 
 use arxiv::Arxiv;
 use derive_builder::Builder;
@@ -122,7 +122,7 @@ mod test {
             , where we also won the 1st
             places on the tasks of ImageNet detection, ImageNet localization, COCO detection, and COCO segmentation
             "#.to_string();
-        
+
         let res: TopicData = extracter.extract(&ctx).await.unwrap();
 
         println!("{:?}", res)

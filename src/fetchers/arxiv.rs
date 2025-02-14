@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use arxiv::{Arxiv, ArxivQuery, ArxivQueryBuilder};
 use derive_builder::Builder;
 
@@ -30,9 +28,7 @@ impl Fetcher for ArxivFetcher {
             .await
             .map_err(|e| format!("arixv::fetch_arxivs error {:?}", e))?;
 
-        Ok(arxivs
-            .into_iter()
-            .collect())
+        Ok(arxivs.into_iter().collect())
     }
 }
 

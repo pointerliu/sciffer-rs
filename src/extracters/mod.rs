@@ -1,13 +1,10 @@
 use std::{
-    collections::HashMap,
     error::Error,
     fmt::{Debug, Display},
 };
 
 use langchain_rust::chain::ChainError;
 use serde::de::DeserializeOwned;
-
-use crate::fetchers::Fetcher;
 
 pub mod topic;
 
