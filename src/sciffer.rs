@@ -10,7 +10,7 @@ use serde::de::DeserializeOwned;
 
 use crate::{
     analyzers::TrendingAnalyzer,
-    extracters::{topic::TopicData, Extracter},
+    extracters::Extracter,
     fetchers::{Fetcher, FetcherError},
 };
 
@@ -72,13 +72,22 @@ where
             if let Ok(d) = result.1 {
                 res.push((result.0, d));
             } else {
-                println!("error when processing, {:?}", result);
+                println!("error when processing, arxiv id: {:?} with err {:?}", result.0.id, result.1);
             }
         }
 
         let trending_res = self.analyzer.problems(&res);
 
         println!("{:#?}", trending_res);
+        for (i, (keyword, papers)) in trending_res.iter().enumerate() {
+            println!("HOT {}: {}", i, keyword);
+            println!("[");
+            for p in papers {
+                println!("\tid={}", p.id);
+                println!("\ttitle={}", p.title);
+            }
+            println!("]");
+        }
 
         Ok(())
     }

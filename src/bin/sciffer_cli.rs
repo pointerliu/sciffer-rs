@@ -19,7 +19,7 @@ struct Args {
     #[arg(
         short,
         long,
-        default_value = "deepseek-ai/DeepSeek-R1-Distill-Llama-7B"
+        default_value = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
     )]
     model: String,
 }
