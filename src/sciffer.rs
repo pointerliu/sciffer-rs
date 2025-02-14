@@ -9,7 +9,8 @@ use futures::{stream::FuturesUnordered, StreamExt};
 use serde::de::DeserializeOwned;
 
 use crate::{
-    extracters::Extracter,
+    analyzers::TrendingAnalyzer,
+    extracters::{topic::TopicData, Extracter},
     fetchers::{Fetcher, FetcherError},
 };
 
@@ -32,33 +33,27 @@ impl Error for ScifferError {}
 
 pub trait Sniffer {
     type ExtracterInput;
-    fn sniffer_parallel<D>(
+    fn sniffer_parallel(
         &self,
-    ) -> impl std::future::Future<
-        Output = Result<Vec<(Self::ExtracterInput, D)>, Box<dyn std::error::Error>>,
-    > + Send
-    where
-        D: Debug + DeserializeOwned + Send;
+    ) -> impl std::future::Future<Output = Result<(), Box<dyn std::error::Error>>> + Send;
 }
 
 #[derive(Builder)]
-pub struct ArxivSciffer<F, E> {
+pub struct ArxivSciffer<F, E, A> {
     fetcher: F,
     extracter: E,
+    analyzer: A,
 }
 
-impl<F, E> Sniffer for ArxivSciffer<F, E>
+impl<F, E, A, D> Sniffer for ArxivSciffer<F, E, A>
 where
     F: Fetcher<Output = Arxiv> + Sync,
     E: Extracter<Input = Arxiv> + Sync,
+    A: TrendingAnalyzer<Raw = Arxiv, Ctx = D> + Sync,
+    D: Debug + DeserializeOwned + Send,
 {
     type ExtracterInput = E::Input;
-    async fn sniffer_parallel<D>(
-        &self,
-    ) -> Result<Vec<(Self::ExtracterInput, D)>, Box<dyn std::error::Error>>
-    where
-        D: Debug + DeserializeOwned + Send,
-    {
+    async fn sniffer_parallel(&self) -> Result<(), Box<dyn std::error::Error>> {
         let fetched_data = self
             .fetcher
             .fetch()
@@ -81,46 +76,10 @@ where
             }
         }
 
-        Ok(res)
-    }
-}
+        let trending_res = self.analyzer.problems(&res);
 
-#[cfg(test)]
-mod test {
-    use langchain_rust::llm::client::Ollama;
+        println!("{:#?}", trending_res);
 
-    use crate::sciffer::Sniffer;
-    use crate::{
-        extracters::topic::{TopicData, TopicExtracterBuilder},
-        fetchers::arxiv::ArxivFetcherBuilder,
-        sciffer::ArxivScifferBuilder,
-    };
-
-    #[tokio::test]
-    async fn test_sciffer() {
-        let fetcher = ArxivFetcherBuilder::default()
-            .query("machine learning".to_string())
-            .number(5)
-            .build()
-            .unwrap();
-
-        let llm = Ollama::default().with_model("llama3.2:3b");
-        let extracter = TopicExtracterBuilder::default()
-            .llm(Box::new(llm))
-            .build()
-            .unwrap();
-
-        let sciffer = ArxivScifferBuilder::default()
-            .fetcher(fetcher)
-            .extracter(extracter)
-            .build()
-            .unwrap();
-
-        sciffer
-            .sniffer_parallel::<TopicData>()
-            .await
-            .unwrap()
-            .iter()
-            .for_each(|x| println!("{:?}", x));
+        Ok(())
     }
 }
