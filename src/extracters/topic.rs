@@ -1,5 +1,6 @@
 use std::{collections::HashMap, fmt::Debug, fs};
 
+use arxiv::Arxiv;
 use derive_builder::Builder;
 use langchain_rust::{
     fmt_template,
@@ -37,13 +38,15 @@ impl Default for TopicExtracter {
 }
 
 impl Extracter for TopicExtracter {
-    async fn extract<D>(&self, ctx: &HashMap<String, String>) -> Result<D, ExtracterError>
+    type Input = Arxiv;
+
+    async fn extract<D>(&self, ctx: &Self::Input) -> Result<D, ExtracterError>
     where
         D: DeserializeOwned + Debug,
     {
         let args = prompt_args![
-            "title" => ctx["title"],
-            "summary" => ctx["summary"]];
+            "title" => ctx.title,
+            "summary" => ctx.summary];
         let data = self
             .invoke(args)
             .await
@@ -82,6 +85,7 @@ pub struct TopicData {
 mod test {
     use std::collections::HashMap;
 
+    use arxiv::Arxiv;
     use langchain_rust::llm::client::Ollama;
 
     use crate::extracters::{
@@ -97,16 +101,13 @@ mod test {
             .build()
             .unwrap();
 
-        let mut ctx = HashMap::new();
-        ctx.insert(
-            "title".to_string(),
-            "Deep Residual Learning for Image Recognition".to_string(),
-        );
-        ctx.insert("summary".to_string(), r#"
+        let mut ctx = Arxiv::default();
+        ctx.title = "Deep Residual Learning for Image Recognition".to_string();
+        ctx.summary = r#"
             Deeper neural networks are more difficult to train. We
             present a residual learning framework to ease the training
             of networks that are substantially deeper than those used
-            previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual
+            previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual
             networks are easier to optimize, and can gain accuracy from
             considerably increased depth. On the ImageNet dataset we
             evaluate residual nets with a depth of up to 152 layers—8×
@@ -120,7 +121,8 @@ mod test {
             & COCO 2015 competitions1
             , where we also won the 1st
             places on the tasks of ImageNet detection, ImageNet localization, COCO detection, and COCO segmentation
-            "#.to_string());
+            "#.to_string();
+        
         let res: TopicData = extracter.extract(&ctx).await.unwrap();
 
         println!("{:?}", res)

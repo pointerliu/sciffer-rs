@@ -3,6 +3,7 @@ use std::{
     fmt::{Debug, Display},
 };
 
+use arxiv::Arxiv;
 use derive_builder::Builder;
 use futures::{stream::FuturesUnordered, StreamExt};
 use serde::de::DeserializeOwned;
@@ -29,18 +30,29 @@ impl Display for ScifferError {
 }
 impl Error for ScifferError {}
 
+pub trait Sniffer {
+    async fn sniffer_sequential<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    where
+        D: Debug + DeserializeOwned;
+
+    async fn sniffer_parallel<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    where
+        D: Debug + DeserializeOwned;
+}
+
+
 #[derive(Builder)]
-pub struct Sciffer<F, E> {
+pub struct ArxivSciffer<F, E> {
     fetcher: F,
     extracter: E,
 }
 
-impl<F, E> Sciffer<F, E>
+impl<F, E> Sniffer for ArxivSciffer<F, E>
 where
-    F: Fetcher,
-    E: Extracter,
+    F: Fetcher<Output = Arxiv>,
+    E: Extracter<Input = Arxiv>,
 {
-    pub async fn sniffer_sequential<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    async fn sniffer_sequential<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
     where
         D: Debug + DeserializeOwned,
     {
@@ -60,7 +72,7 @@ where
         Ok(res)
     }
 
-    pub async fn sniffer_parallel<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    async fn sniffer_parallel<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
     where
         D: Debug + DeserializeOwned,
     {
@@ -92,10 +104,9 @@ mod test {
 
     use crate::{
         extracters::topic::{TopicData, TopicExtracterBuilder},
-        fetchers::arxiv::ArxivFetcherBuilder,
+        fetchers::arxiv::ArxivFetcherBuilder, sciffer::ArxivScifferBuilder,
     };
-
-    use super::ScifferBuilder;
+    use crate::sciffer::Sniffer;
 
     #[tokio::test]
     async fn test_sciffer() {
@@ -111,7 +122,7 @@ mod test {
             .build()
             .unwrap();
 
-        let sciffer = ScifferBuilder::default()
+        let sciffer = ArxivScifferBuilder::default()
             .fetcher(fetcher)
             .extracter(extracter)
             .build()

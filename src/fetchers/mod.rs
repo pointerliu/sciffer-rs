@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 pub mod arxiv;
 
 #[derive(Debug)]
@@ -15,7 +13,9 @@ impl From<String> for FetcherError {
 }
 
 pub trait Fetcher {
+    type Output;
+    
     fn fetch(
         &self,
-    ) -> impl std::future::Future<Output = Result<Vec<HashMap<String, String>>, FetcherError>> + Send;
+    ) -> impl std::future::Future<Output = Result<Vec<Self::Output>, FetcherError>> + Send;
 }

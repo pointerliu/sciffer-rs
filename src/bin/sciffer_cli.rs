@@ -4,7 +4,7 @@ use langchain_rust::tools::OpenAIConfig;
 use sciffer_rs::{
     extracters::topic::{TopicData, TopicExtracterBuilder},
     fetchers::arxiv::ArxivFetcherBuilder,
-    sciffer::ScifferBuilder,
+    sciffer::{ArxivScifferBuilder, Sniffer},
 };
 use std::env;
 use clap::Parser;
@@ -43,7 +43,7 @@ async fn main() {
         .build()
         .unwrap();
 
-    let sciffer = ScifferBuilder::default()
+    let sciffer = ArxivScifferBuilder::default()
         .fetcher(fetcher)
         .extracter(extracter)
         .build()

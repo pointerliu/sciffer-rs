@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use arxiv::{ArxivQuery, ArxivQueryBuilder};
+use arxiv::{Arxiv, ArxivQuery, ArxivQueryBuilder};
 use derive_builder::Builder;
 
 use super::{Fetcher, FetcherError};
@@ -22,7 +22,9 @@ impl Default for ArxivFetcher {
 }
 
 impl Fetcher for ArxivFetcher {
-    async fn fetch(&self) -> Result<Vec<HashMap<String, String>>, FetcherError> {
+    type Output = Arxiv;
+
+    async fn fetch(&self) -> Result<Vec<Self::Output>, FetcherError> {
         let arxiv_query = self.build_arixv_query();
         let arxivs = arxiv::fetch_arxivs(arxiv_query)
             .await
@@ -30,12 +32,6 @@ impl Fetcher for ArxivFetcher {
 
         Ok(arxivs
             .into_iter()
-            .map(|x| {
-                HashMap::from([
-                    ("title".to_string(), x.title),
-                    ("summary".to_string(), x.summary),
-                ])
-            })
             .collect())
     }
 }

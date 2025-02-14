@@ -7,6 +7,8 @@ use std::{
 use langchain_rust::chain::ChainError;
 use serde::de::DeserializeOwned;
 
+use crate::fetchers::Fetcher;
+
 pub mod topic;
 
 #[derive(Debug)]
@@ -23,9 +25,11 @@ impl Display for ExtracterError {
 impl Error for ExtracterError {}
 
 pub trait Extracter {
+    type Input;
+
     fn extract<D>(
         &self,
-        ctx: &HashMap<String, String>,
+        ctx: &Self::Input,
     ) -> impl std::future::Future<Output = Result<D, ExtracterError>> + Send
     where
         D: DeserializeOwned + Debug;
