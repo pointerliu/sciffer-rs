@@ -31,10 +31,6 @@ impl Display for ScifferError {
 impl Error for ScifferError {}
 
 pub trait Sniffer {
-    fn sniffer_sequential<D>(&self) -> impl std::future::Future<Output = Result<Vec<D>, Box<dyn std::error::Error>>> + Send
-    where
-        D: Debug + DeserializeOwned + Send;
-
     fn sniffer_parallel<D>(&self) -> impl std::future::Future<Output = Result<Vec<D>, Box<dyn std::error::Error>>> + Send
     where
         D: Debug + DeserializeOwned + Send;
@@ -52,26 +48,6 @@ where
     F: Fetcher<Output = Arxiv> + Sync,
     E: Extracter<Input = Arxiv> + Sync,
 {
-    async fn sniffer_sequential<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
-    where
-        D: Debug + DeserializeOwned + Send,
-    {
-        let fetched_data = self
-            .fetcher
-            .fetch()
-            .await
-            .map_err(|err| ScifferError::FetcherError(err))?;
-        // let extracted_data = fetched_data.into_iter().map(|ctx| async {}).collect();
-
-        let mut res: Vec<D> = vec![];
-        for ctx in fetched_data.iter() {
-            let topic_data: D = self.extracter.extract(ctx).await?;
-            res.push(topic_data);
-        }
-
-        Ok(res)
-    }
-
     async fn sniffer_parallel<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
     where
         D: Debug + DeserializeOwned + Send,
@@ -91,7 +67,11 @@ where
 
         let mut res = Vec::new();
         while let Some(result) = futures.next().await {
-            res.push(result?);
+            if let Ok(d) = result {
+                res.push(d);
+            } else {
+                println!("error when processing, {:?}", result);
+            }
         }
 
         Ok(res)

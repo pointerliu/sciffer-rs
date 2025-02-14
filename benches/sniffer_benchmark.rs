@@ -62,20 +62,6 @@ where
         .for_each(|x| println!("{:?}", x));
 }
 
-async fn sciffer_sequential<F, E, D>(sciffer: &ArxivSciffer<F, E>)
-where
-    F: Fetcher<Output = Arxiv> + Sync,
-    E: Extracter<Input = Arxiv> + Sync,
-    D: Debug + DeserializeOwned + Send,
-{
-    sciffer
-        .sniffer_sequential::<D>()
-        .await
-        .unwrap()
-        .iter()
-        .for_each(|x| println!("{:?}", x));
-}
-
 fn benchmark_sniffer(c: &mut Criterion) {
     let mut group = c.benchmark_group("sciffer-process");
     group.sample_size(10);
@@ -86,11 +72,6 @@ fn benchmark_sniffer(c: &mut Criterion) {
     group.bench_function("sniffer_parallel", |b| {
         b.iter(|| {
             runtime.block_on(sciffer_parallel::<_, _, TopicData>(&sciffer));
-        })
-    });
-    group.bench_function("sniffer_sequential", |b| {
-        b.iter(|| {
-            runtime.block_on(sciffer_sequential::<_, _, TopicData>(&sciffer));
         })
     });
 }
