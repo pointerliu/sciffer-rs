@@ -75,10 +75,10 @@ impl AgentApp for TopicExtracter {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TopicData {
-    title: String,
-    solved_problem: Vec<String>,
-    research_field: Vec<String>,
-    techniques_used: Vec<String>,
+    pub title: String,
+    pub solved_problem: Vec<String>,
+    pub research_field: Vec<String>,
+    pub techniques_used: Vec<String>,
 }
 
 #[cfg(test)]
