@@ -54,5 +54,5 @@ async fn main() {
         .await
         .unwrap()
         .iter()
-        .for_each(|x| println!("{:?}", x));
+        .for_each(|(x, d)| println!("arxiv-id: {:#?} topic: {:#?}", x.id, d));
 }

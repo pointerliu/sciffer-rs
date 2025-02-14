@@ -31,11 +31,15 @@ impl Display for ScifferError {
 impl Error for ScifferError {}
 
 pub trait Sniffer {
-    fn sniffer_parallel<D>(&self) -> impl std::future::Future<Output = Result<Vec<D>, Box<dyn std::error::Error>>> + Send
+    type ExtracterInput;
+    fn sniffer_parallel<D>(
+        &self,
+    ) -> impl std::future::Future<
+        Output = Result<Vec<(Self::ExtracterInput, D)>, Box<dyn std::error::Error>>,
+    > + Send
     where
         D: Debug + DeserializeOwned + Send;
 }
-
 
 #[derive(Builder)]
 pub struct ArxivSciffer<F, E> {
@@ -48,7 +52,10 @@ where
     F: Fetcher<Output = Arxiv> + Sync,
     E: Extracter<Input = Arxiv> + Sync,
 {
-    async fn sniffer_parallel<D>(&self) -> Result<Vec<D>, Box<dyn std::error::Error>>
+    type ExtracterInput = E::Input;
+    async fn sniffer_parallel<D>(
+        &self,
+    ) -> Result<Vec<(Self::ExtracterInput, D)>, Box<dyn std::error::Error>>
     where
         D: Debug + DeserializeOwned + Send,
     {
@@ -62,13 +69,13 @@ where
         let mut futures = FuturesUnordered::new();
         for ctx in fetched_data.iter() {
             let extracter = &self.extracter;
-            futures.push(async move { extracter.extract(&ctx).await });
+            futures.push(async move { (ctx.clone(), extracter.extract::<D>(&ctx).await) });
         }
 
         let mut res = Vec::new();
         while let Some(result) = futures.next().await {
-            if let Ok(d) = result {
-                res.push(d);
+            if let Ok(d) = result.1 {
+                res.push((result.0, d));
             } else {
                 println!("error when processing, {:?}", result);
             }
@@ -82,11 +89,12 @@ where
 mod test {
     use langchain_rust::llm::client::Ollama;
 
+    use crate::sciffer::Sniffer;
     use crate::{
         extracters::topic::{TopicData, TopicExtracterBuilder},
-        fetchers::arxiv::ArxivFetcherBuilder, sciffer::ArxivScifferBuilder,
+        fetchers::arxiv::ArxivFetcherBuilder,
+        sciffer::ArxivScifferBuilder,
     };
-    use crate::sciffer::Sniffer;
 
     #[tokio::test]
     async fn test_sciffer() {
