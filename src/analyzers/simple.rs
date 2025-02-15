@@ -14,11 +14,11 @@ impl TrendingAnalyzer for SimpleArixvTrendingAnalyzer {
     type Raw = Arxiv;
     type Ctx = TopicData;
 
-    fn problems(&self, data: &Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
+    fn top_k<F: Fn(&Self::Ctx) -> Vec<String>>(&self, data: &Vec<(Self::Raw, Self::Ctx)>, f: F) -> Vec<(String, Vec<Self::Raw>)> {
         let mut cnt: HashMap<String, Vec<Self::Raw>> = HashMap::new();
 
         for (raw, ctx) in data {
-            let problems = ctx.solved_problem.clone();
+            let problems = f(ctx).clone();
             for problem in problems.iter() {
                 let entry = cnt.entry(problem.clone()).or_insert(Vec::new());
                 entry.push(raw.clone());
@@ -36,13 +36,5 @@ impl TrendingAnalyzer for SimpleArixvTrendingAnalyzer {
         sorted_problems.sort_by(|a, b| b.1.len().cmp(&a.1.len()).then(b.0.cmp(&a.0))); // Sort by the length of associated raws (i.e., count)
 
         sorted_problems
-    }
-
-    fn techniques(&self, data: &Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
-        todo!()
-    }
-
-    fn fields(&self, data: &Vec<(Self::Raw, Self::Ctx)>) -> Vec<(String, Vec<Self::Raw>)> {
-        todo!()
     }
 }
