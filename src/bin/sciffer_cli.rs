@@ -25,6 +25,8 @@ struct Args {
         default_value = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
     )]
     model: String,
+    #[arg(short, long, default_value = "prompts/topic.pt")]
+    prompt: String,
 }
 
 #[tokio::main]
@@ -54,7 +56,11 @@ async fn main() {
         )
     };
 
-    let extracter = TopicExtracterBuilder::default().llm(llm).build().unwrap();
+    let extracter = TopicExtracterBuilder::default()
+        .prompt(args.prompt)
+        .llm(llm)
+        .build()
+        .unwrap();
 
     let analyzer = SimpleArixvTrendingAnalyzerBuilder::default()
         .build()

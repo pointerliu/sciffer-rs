@@ -19,12 +19,15 @@ use super::{Extracter, ExtracterError};
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct TopicExtracter {
+    #[builder(default="prompts/topic.pt".to_string())]
+    prompt: String,
     llm: Box<dyn LLM>,
 }
 
 impl Clone for TopicExtracter {
     fn clone(&self) -> Self {
         Self {
+            prompt: self.prompt.clone(),
             llm: self.llm.clone_box(),
         }
     }
@@ -33,7 +36,10 @@ impl Clone for TopicExtracter {
 impl Default for TopicExtracter {
     fn default() -> Self {
         let llm = Ollama::default().with_model("llama3.2:3b");
-        Self { llm: Box::new(llm) }
+        Self { 
+            prompt: "prompts/topic.pt".to_string(),
+            llm: Box::new(llm) 
+        }
     }
 }
 
@@ -61,7 +67,7 @@ impl Extracter for TopicExtracter {
 
 impl AgentApp for TopicExtracter {
     fn get_prompt(&self) -> Box<dyn FormatPrompter> {
-        let topic_prompt = fs::read_to_string("prompts/topic.pt").unwrap();
+        let topic_prompt = fs::read_to_string(&self.prompt).unwrap();
         let prompt = message_formatter![fmt_template!(HumanMessagePromptTemplate::new(
             template_fstring!(topic_prompt, "title", "summary")
         ))];
