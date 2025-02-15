@@ -72,7 +72,10 @@ where
             if let Ok(d) = result.1 {
                 res.push((result.0, d));
             } else {
-                println!("error when processing, arxiv id: {:?} with err {:?}", result.0.id, result.1);
+                println!(
+                    "error when processing, arxiv id: {:?} with err {:?}",
+                    result.0.id, result.1
+                );
             }
         }
 
