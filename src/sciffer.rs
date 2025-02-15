@@ -31,10 +31,11 @@ impl Display for ScifferError {
 }
 impl Error for ScifferError {}
 
-pub trait Sniffer {
+pub trait Sniffer<D> {
     type ExtracterInput;
-    fn sniffer_parallel(
+    fn sniffer_parallel<M: Fn(&D) -> Vec<String> + Send>(
         &self,
+        f: M
     ) -> impl std::future::Future<Output = Result<(), Box<dyn std::error::Error>>> + Send;
 }
 
@@ -45,7 +46,7 @@ pub struct ArxivSciffer<F, E, A> {
     analyzer: A,
 }
 
-impl<F, E, A, D> Sniffer for ArxivSciffer<F, E, A>
+impl<F, E, A, D> Sniffer<D> for ArxivSciffer<F, E, A>
 where
     F: Fetcher<Output = Arxiv> + Sync,
     E: Extracter<Input = F::Output> + Sync,
@@ -53,7 +54,7 @@ where
     D: Debug + DeserializeOwned + Send,
 {
     type ExtracterInput = E::Input;
-    async fn sniffer_parallel(&self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn sniffer_parallel<M: Fn(&D) -> Vec<String> + Send>(&self, f: M) -> Result<(), Box<dyn std::error::Error>> {
         let fetched_data = self
             .fetcher
             .fetch()
@@ -79,7 +80,7 @@ where
             }
         }
 
-        let trending_res = self.analyzer.problems(&res);
+        let trending_res = self.analyzer.top_k(&res, f);
 
         println!("{:#?}", trending_res);
         for (i, (keyword, papers)) in trending_res.iter().enumerate() {
