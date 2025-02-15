@@ -14,7 +14,11 @@ impl TrendingAnalyzer for SimpleArixvTrendingAnalyzer {
     type Raw = Arxiv;
     type Ctx = TopicData;
 
-    fn top_k<F: Fn(&Self::Ctx) -> Vec<String>>(&self, data: &Vec<(Self::Raw, Self::Ctx)>, f: F) -> Vec<(String, Vec<Self::Raw>)> {
+    fn top_k<F: Fn(&Self::Ctx) -> Vec<String>>(
+        &self,
+        data: &Vec<(Self::Raw, Self::Ctx)>,
+        f: F,
+    ) -> Vec<(String, Vec<Self::Raw>)> {
         let mut cnt: HashMap<String, Vec<Self::Raw>> = HashMap::new();
 
         for (raw, ctx) in data {

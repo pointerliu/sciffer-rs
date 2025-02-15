@@ -35,7 +35,7 @@ pub trait Sniffer<D> {
     type ExtracterInput;
     fn sniffer_parallel<M: Fn(&D) -> Vec<String> + Send>(
         &self,
-        f: M
+        f: M,
     ) -> impl std::future::Future<Output = Result<(), Box<dyn std::error::Error>>> + Send;
 }
 
@@ -54,7 +54,10 @@ where
     D: Debug + DeserializeOwned + Send,
 {
     type ExtracterInput = E::Input;
-    async fn sniffer_parallel<M: Fn(&D) -> Vec<String> + Send>(&self, f: M) -> Result<(), Box<dyn std::error::Error>> {
+    async fn sniffer_parallel<M: Fn(&D) -> Vec<String> + Send>(
+        &self,
+        f: M,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let fetched_data = self
             .fetcher
             .fetch()

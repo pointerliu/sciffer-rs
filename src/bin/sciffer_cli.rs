@@ -67,7 +67,11 @@ async fn main() {
         .build()
         .unwrap();
 
-    sciffer.sniffer_parallel(|ctx| {
-        ctx.solved_problem.clone()
-    }).await.unwrap();
+    sciffer
+        .sniffer_parallel(|ctx| {
+            // ctx.solved_problem.clone()
+            ctx.research_field.clone()
+        })
+        .await
+        .unwrap();
 }
