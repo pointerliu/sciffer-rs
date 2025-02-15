@@ -35,12 +35,17 @@ impl Fetcher for ArxivFetcher {
 impl ArxivFetcher {
     fn build_arixv_query(&self) -> ArxivQuery {
         ArxivQueryBuilder::new()
-            .search_query(&self.query)
+            .search_query(&Self::query_adaptor(&self.query))
             .start(0)
             .max_results(self.number)
             .sort_by("submittedDate")
             .sort_order("descending")
             .build()
+    }
+
+    fn query_adaptor(query: &str) -> String {
+        let words: Vec<String> = query.split(" ").map(|s| format!("all:{}", s)).collect();
+        words.join("+AND+")
     }
 }
 
@@ -59,7 +64,7 @@ impl ArxivFetcher {
 mod test {
     use crate::fetchers::Fetcher;
 
-    use super::ArxivFetcherBuilder;
+    use super::{ArxivFetcher, ArxivFetcherBuilder};
 
     #[tokio::test]
     async fn test_arxiv_fetcher() {
@@ -71,5 +76,12 @@ mod test {
         let res = fetcher.fetch().await.unwrap();
 
         res.iter().for_each(|x| println!("title = {:?}", x));
+    }
+
+    #[test]
+    fn test_query_adaptor() {
+        let query = "machine learning";
+        let res = ArxivFetcher::query_adaptor(&query);
+        println!("{}", res);
     }
 }
