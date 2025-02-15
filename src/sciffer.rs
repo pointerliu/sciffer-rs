@@ -48,8 +48,8 @@ pub struct ArxivSciffer<F, E, A> {
 impl<F, E, A, D> Sniffer for ArxivSciffer<F, E, A>
 where
     F: Fetcher<Output = Arxiv> + Sync,
-    E: Extracter<Input = Arxiv> + Sync,
-    A: TrendingAnalyzer<Raw = Arxiv, Ctx = D> + Sync,
+    E: Extracter<Input = F::Output> + Sync,
+    A: TrendingAnalyzer<Raw = F::Output, Ctx = D> + Sync,
     D: Debug + DeserializeOwned + Send,
 {
     type ExtracterInput = E::Input;
