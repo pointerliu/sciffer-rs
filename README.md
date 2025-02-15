@@ -6,7 +6,7 @@
 
 ## TODOs
 
-- [ ] add arxiv keys to TopicData
+- [x] add arxiv keys to TopicData
 - [ ] analyze extracted keywords
 - [ ] registry system
 - [ ] save to database
