@@ -13,7 +13,10 @@ struct MyData {
 
 pub trait Extracter {
     // The async method that extracts and deserializes data into the type D.
-    async fn extract<D>(&self, ctx: &HashMap<String, String>) -> Result<D, Box<dyn Error>>
+    fn extract<D>(
+        &self,
+        ctx: &HashMap<String, String>,
+    ) -> impl std::future::Future<Output = Result<D, Box<dyn Error>>> + Send
     where
         D: DeserializeOwned; // Ensure that D is deserializable.
 }
