@@ -1,25 +1,18 @@
-use std::{env, fmt::Debug};
+use std::env;
 
-use arxiv::Arxiv;
 use async_openai::config::OPENAI_API_BASE;
 use criterion::{criterion_group, criterion_main, Criterion};
 use langchain_rust::llm::{OpenAI, OpenAIConfig};
 use sciffer_rs::{
-    extracters::{
-        topic::{TopicData, TopicExtracter, TopicExtracterBuilder},
-        Extracter,
-    },
-    fetchers::{
-        arxiv::{ArxivFetcher, ArxivFetcherBuilder},
-        Fetcher,
-    },
+    analyzers::simple::SimpleArixvTrendingAnalyzer,
+    extracters::topic::{TopicExtracter, TopicExtracterBuilder},
+    fetchers::arxiv::{ArxivFetcher, ArxivFetcherBuilder},
     sciffer::{ArxivSciffer, ArxivScifferBuilder, Sniffer},
 };
-use serde::de::DeserializeOwned;
 
 use tokio::runtime::Runtime;
 
-fn setup_sciffer() -> ArxivSciffer<ArxivFetcher, TopicExtracter> {
+fn setup_sciffer() -> ArxivSciffer<ArxivFetcher, TopicExtracter, SimpleArixvTrendingAnalyzer> {
     let _ = dotenv::dotenv();
     let fetcher = ArxivFetcherBuilder::default()
         .query("machine learning".to_string())
@@ -49,20 +42,6 @@ fn setup_sciffer() -> ArxivSciffer<ArxivFetcher, TopicExtracter> {
     sciffer
 }
 
-async fn sciffer_parallel<F, E, D>(sciffer: &ArxivSciffer<F, E>)
-where
-    F: Fetcher<Output = Arxiv> + Sync,
-    E: Extracter<Input = Arxiv> + Sync,
-    D: Debug + DeserializeOwned + Send,
-{
-    sciffer
-        .sniffer_parallel::<D>()
-        .await
-        .unwrap()
-        .iter()
-        .for_each(|x| println!("{:?}", x));
-}
-
 fn benchmark_sniffer(c: &mut Criterion) {
     let mut group = c.benchmark_group("sciffer-process");
     group.sample_size(10);
@@ -72,7 +51,15 @@ fn benchmark_sniffer(c: &mut Criterion) {
     let runtime = Runtime::new().unwrap();
     group.bench_function("sniffer_parallel", |b| {
         b.iter(|| {
-            runtime.block_on(sciffer_parallel::<_, _, TopicData>(&sciffer));
+            runtime.block_on(async {
+                sciffer
+                    .sniffer_parallel(|ctx| {
+                        // ctx.solved_problem.clone()
+                        ctx.research_field.clone()
+                    })
+                    .await
+                    .unwrap();
+            });
         })
     });
 }
