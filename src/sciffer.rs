@@ -1,17 +1,22 @@
+use crate::dao::add_paper_with_keywords;
+use crate::extracters::topic::ArxivTopicData;
+use crate::models::{Keyword, Paper};
+use crate::{
+    db,
+    extracters::Extracter,
+    fetchers::{Fetcher, FetcherError},
+};
+use arxiv::Arxiv;
+use async_trait::async_trait;
+use chrono::Local;
+use derive_builder::Builder;
+use futures::{stream::FuturesUnordered, StreamExt};
+use std::time::Duration;
 use std::{
     error::Error,
     fmt::{Debug, Display},
 };
-
-use arxiv::Arxiv;
-use derive_builder::Builder;
-use futures::{stream::FuturesUnordered, StreamExt};
-
-use crate::extracters::topic::ArxivTopicData;
-use crate::{
-    extracters::Extracter,
-    fetchers::{Fetcher, FetcherError},
-};
+use tokio::time::sleep;
 
 #[derive(Debug)]
 enum ScifferError {
@@ -35,7 +40,14 @@ pub trait Sniffer {
     type Output;
     fn sniffer_parallel(
         &self,
-    ) -> impl std::future::Future<Output = Result<Vec<(Self::Input, Self::Output)>, Box<dyn Error>>> + Send;
+    ) -> impl std::future::Future<
+        Output = Result<Vec<(Self::Input, Self::Output)>, Box<dyn std::error::Error + Send + Sync>>,
+    > + Send;
+}
+
+#[async_trait]
+pub trait SnifferServer: Sniffer {
+    async fn start_server(&self) -> Result<(), sqlx::Error>;
 }
 
 #[derive(Builder)]
@@ -51,7 +63,9 @@ where
 {
     type Input = Arxiv;
     type Output = ArxivTopicData;
-    async fn sniffer_parallel(&self) -> Result<Vec<(Self::Input, Self::Output)>, Box<dyn Error>> {
+    async fn sniffer_parallel(
+        &self,
+    ) -> Result<Vec<(Self::Input, Self::Output)>, Box<dyn Error + Send + Sync>> {
         let fetched_data = self
             .fetcher
             .fetch()
@@ -78,5 +92,56 @@ where
         }
 
         Ok(res)
+    }
+}
+
+#[async_trait]
+impl<F, E> SnifferServer for ArxivSciffer<F, E>
+where
+    F: Fetcher<Output = Arxiv> + Sync,
+    E: Extracter<Input = Arxiv, Output = ArxivTopicData> + Sync,
+{
+    async fn start_server(&self) -> Result<(), sqlx::Error> {
+        let pool = db::get_db_pool().await?;
+        loop {
+            if let Ok(res) = self.sniffer_parallel().await {
+                let today = Local::now();
+                let date_str = today.to_string();
+                let data = res
+                    .iter()
+                    .map(|(meta, ext_meta)| {
+                        let meta = meta.clone();
+                        let ext_meta = ext_meta.clone();
+                        let paper = Paper {
+                            id: 0,
+                            title: meta.title,
+                            abstract_text: Some(meta.summary),
+                            publish_date: Some(meta.published),
+                            insert_date: date_str.clone(),
+                            url: meta.pdf_url,
+                        };
+
+                        let keywords: Vec<Keyword> = ext_meta
+                            .techniques_used
+                            .iter()
+                            .map(|s| Keyword {
+                                id: 0,
+                                keyword: s.to_string(),
+                            })
+                            .collect();
+                        (paper, keywords)
+                    })
+                    .collect::<Vec<_>>();
+
+                for (paper, keywords) in data {
+                    if let Err(err) = add_paper_with_keywords(&pool, &paper, &keywords).await {
+                        println!("add_paper_with_keywords error: {:?}", err);
+                    }
+                }
+
+                println!("add papers finished @ {}: {:?}", date_str, res);
+                sleep(Duration::from_secs(5)).await;
+            }
+        }
     }
 }
