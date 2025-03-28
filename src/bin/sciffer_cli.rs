@@ -62,10 +62,6 @@ async fn main() {
         .build()
         .unwrap();
 
-    let analyzer = SimpleArixvTrendingAnalyzerBuilder::default()
-        .build()
-        .unwrap();
-
     let sciffer = ArxivScifferBuilder::default()
         .fetcher(fetcher)
         .extracter(extracter)

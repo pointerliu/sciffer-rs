@@ -1,22 +1,21 @@
-use crate::models::paper::Paper;
+use crate::models::Paper;
 use sqlx::{query, query_as, SqlitePool};
 
 pub struct PaperDAO;
 
 impl PaperDAO {
-    pub async fn create_paper(pool: &SqlitePool, paper: &Paper) -> Result<(), sqlx::Error> {
-        query!(
-            "INSERT INTO papers (title, abstract_text, publish_date, insert_date, url, keywords) VALUES (?, ?, ?, ?, ?, ?)",
+    pub async fn create_paper(pool: &SqlitePool, paper: &Paper) -> Result<i64, sqlx::Error> {
+        let id = query!(
+            "INSERT INTO papers (title, abstract_text, publish_date, insert_date, url) VALUES (?, ?, ?, ?, ?) RETURNING id",
             paper.title,
             paper.abstract_text,
             paper.publish_date,
             paper.insert_date,
             paper.url,
-            paper.keywords
         )
-            .execute(pool)
+            .fetch_one(pool)
             .await?;
-        Ok(())
+        Ok(id.id)
     }
 
     // Retrieve all papers

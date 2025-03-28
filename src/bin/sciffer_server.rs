@@ -3,6 +3,7 @@ use clap::Parser;
 use langchain_rust::language_models::llm::LLM;
 use langchain_rust::llm::{client::Ollama, OpenAI};
 use langchain_rust::tools::OpenAIConfig;
+use sciffer_rs::sciffer::SnifferServer;
 use sciffer_rs::{
     analyzers::simple::SimpleArixvTrendingAnalyzerBuilder,
     extracters::topic::TopicExtracterBuilder,
@@ -62,22 +63,11 @@ async fn main() {
         .build()
         .unwrap();
 
-    let analyzer = SimpleArixvTrendingAnalyzerBuilder::default()
-        .build()
-        .unwrap();
-
     let sciffer = ArxivScifferBuilder::default()
         .fetcher(fetcher)
         .extracter(extracter)
-        .analyzer(analyzer)
         .build()
         .unwrap();
 
-    sciffer
-        .sniffer_parallel(|ctx| {
-            // ctx.solved_problem.clone()
-            ctx.research_field.clone()
-        })
-        .await
-        .unwrap();
+    sciffer.start_server().await.unwrap();
 }
