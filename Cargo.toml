@@ -17,7 +17,6 @@ regex = "1.11.1"
 dotenv = "0.15.0"
 async-openai = "0.27.2"
 clap = { version = "4.5.29", features = ["derive"] }
-systemstat = "0.2.4"
 sqlx = { version = "0.8.3", features = ["sqlite", "runtime-tokio", "tls-native-tls"] }
 async-trait = "0.1.86"
 chrono = "0.4.40"
