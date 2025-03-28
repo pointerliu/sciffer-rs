@@ -16,6 +16,7 @@ use std::{
     error::Error,
     fmt::{Debug, Display},
 };
+use log::{error, info};
 use tokio::time::sleep;
 
 #[derive(Debug)]
@@ -135,11 +136,11 @@ where
 
                 for (paper, keywords) in data {
                     if let Err(err) = add_paper_with_keywords(&pool, &paper, &keywords).await {
-                        println!("add_paper_with_keywords error: {:?}", err);
+                        error!("add_paper_with_keywords error: {:?}", err);
                     }
                 }
 
-                println!("add papers finished @ {}: {:?}", date_str, res);
+                info!("add papers finished @ {}: {:?}", date_str, res);
                 sleep(Duration::from_secs(5)).await;
             }
         }
