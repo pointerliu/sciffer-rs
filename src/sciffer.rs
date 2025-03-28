@@ -11,12 +11,12 @@ use async_trait::async_trait;
 use chrono::Local;
 use derive_builder::Builder;
 use futures::{stream::FuturesUnordered, StreamExt};
+use log::{error, info};
 use std::time::Duration;
 use std::{
     error::Error,
     fmt::{Debug, Display},
 };
-use log::{error, info};
 use tokio::time::sleep;
 
 #[derive(Debug)]
