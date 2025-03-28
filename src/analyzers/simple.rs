@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use arxiv::Arxiv;
 use derive_builder::Builder;
 
-use crate::extracters::topic::TopicData;
+use crate::extracters::topic::ArxivTopicData;
 
 use super::TrendingAnalyzer;
 
@@ -12,7 +12,7 @@ pub struct SimpleArixvTrendingAnalyzer {}
 
 impl TrendingAnalyzer for SimpleArixvTrendingAnalyzer {
     type Raw = Arxiv;
-    type Ctx = TopicData;
+    type Ctx = ArxivTopicData;
 
     fn top_k<F: Fn(&Self::Ctx) -> Vec<String>>(
         &self,

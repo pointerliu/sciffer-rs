@@ -36,20 +36,18 @@ impl Clone for TopicExtracter {
 impl Default for TopicExtracter {
     fn default() -> Self {
         let llm = Ollama::default().with_model("llama3.2:3b");
-        Self { 
+        Self {
             prompt: "prompts/topic.pt".to_string(),
-            llm: Box::new(llm) 
+            llm: Box::new(llm),
         }
     }
 }
 
 impl Extracter for TopicExtracter {
     type Input = Arxiv;
+    type Output = ArxivTopicData;
 
-    async fn extract<D>(&self, ctx: &Self::Input) -> Result<D, ExtracterError>
-    where
-        D: DeserializeOwned + Debug,
-    {
+    async fn extract(&self, ctx: &Self::Input) -> Result<Self::Output, ExtracterError> {
         let args = prompt_args![
             "title" => ctx.title,
             "summary" => ctx.summary];
@@ -80,7 +78,7 @@ impl AgentApp for TopicExtracter {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct TopicData {
+pub struct ArxivTopicData {
     pub title: String,
     pub solved_problem: Vec<String>,
     pub research_field: Vec<String>,
@@ -93,7 +91,7 @@ mod test {
     use langchain_rust::llm::client::Ollama;
 
     use crate::extracters::{
-        topic::{TopicData, TopicExtracterBuilder},
+        topic::{ArxivTopicData, TopicExtracterBuilder},
         Extracter,
     };
 
@@ -127,7 +125,7 @@ mod test {
             places on the tasks of ImageNet detection, ImageNet localization, COCO detection, and COCO segmentation
             "#.to_string();
 
-        let res: TopicData = extracter.extract(&ctx).await.unwrap();
+        let res: ArxivTopicData = extracter.extract(&ctx).await.unwrap();
 
         println!("{:?}", res)
     }

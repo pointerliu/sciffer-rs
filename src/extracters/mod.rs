@@ -23,11 +23,10 @@ impl Error for ExtracterError {}
 
 pub trait Extracter {
     type Input;
+    type Output;
 
-    fn extract<D>(
+    fn extract(
         &self,
         ctx: &Self::Input,
-    ) -> impl std::future::Future<Output = Result<D, ExtracterError>> + Send
-    where
-        D: DeserializeOwned + Debug;
+    ) -> impl std::future::Future<Output = Result<Self::Output, ExtracterError>> + Send;
 }

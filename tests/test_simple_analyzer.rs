@@ -5,7 +5,7 @@ use rand::seq::SliceRandom;
 use rand::Rng;
 use sciffer_rs::analyzers::simple::SimpleArixvTrendingAnalyzerBuilder;
 use sciffer_rs::analyzers::TrendingAnalyzer;
-use sciffer_rs::extracters::topic::TopicData;
+use sciffer_rs::extracters::topic::ArxivTopicData;
 
 fn generate_random_string(_: usize) -> String {
     let keywords = vec![
@@ -46,8 +46,8 @@ fn generate_dummy_arxiv() -> Arxiv {
     }
 }
 
-fn generate_dummy_topicdata() -> TopicData {
-    TopicData {
+fn generate_dummy_topicdata() -> ArxivTopicData {
+    ArxivTopicData {
         title: generate_random_string(15), // Random topic title
         solved_problem: (0..rand::thread_rng().gen_range(1..4)) // Random number of problems (1-3)
             .map(|_| generate_random_string(25)) // Random solved problems

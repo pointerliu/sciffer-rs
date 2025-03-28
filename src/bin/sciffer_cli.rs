@@ -69,15 +69,9 @@ async fn main() {
     let sciffer = ArxivScifferBuilder::default()
         .fetcher(fetcher)
         .extracter(extracter)
-        .analyzer(analyzer)
         .build()
         .unwrap();
 
-    sciffer
-        .sniffer_parallel(|ctx| {
-            // ctx.solved_problem.clone()
-            ctx.research_field.clone()
-        })
-        .await
-        .unwrap();
+    let res = sciffer.sniffer_parallel().await.unwrap();
+    println!("{:#?}", res);
 }

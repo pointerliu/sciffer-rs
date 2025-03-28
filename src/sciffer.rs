@@ -6,10 +6,9 @@ use std::{
 use arxiv::Arxiv;
 use derive_builder::Builder;
 use futures::{stream::FuturesUnordered, StreamExt};
-use serde::de::DeserializeOwned;
 
+use crate::extracters::topic::ArxivTopicData;
 use crate::{
-    analyzers::TrendingAnalyzer,
     extracters::Extracter,
     fetchers::{Fetcher, FetcherError},
 };
@@ -31,33 +30,28 @@ impl Display for ScifferError {
 }
 impl Error for ScifferError {}
 
-pub trait Sniffer<D> {
-    type ExtracterInput;
-    fn sniffer_parallel<M: Fn(&D) -> Vec<String> + Send>(
+pub trait Sniffer {
+    type Input;
+    type Output;
+    fn sniffer_parallel(
         &self,
-        f: M,
-    ) -> impl std::future::Future<Output = Result<(), Box<dyn std::error::Error>>> + Send;
+    ) -> impl std::future::Future<Output = Result<Vec<(Self::Input, Self::Output)>, Box<dyn Error>>> + Send;
 }
 
 #[derive(Builder)]
-pub struct ArxivSciffer<F, E, A> {
+pub struct ArxivSciffer<F, E> {
     fetcher: F,
     extracter: E,
-    analyzer: A,
 }
 
-impl<F, E, A, D> Sniffer<D> for ArxivSciffer<F, E, A>
+impl<F, E> Sniffer for ArxivSciffer<F, E>
 where
     F: Fetcher<Output = Arxiv> + Sync,
-    E: Extracter<Input = F::Output> + Sync,
-    A: TrendingAnalyzer<Raw = F::Output, Ctx = D> + Sync,
-    D: Debug + DeserializeOwned + Send,
+    E: Extracter<Input = Arxiv, Output = ArxivTopicData> + Sync,
 {
-    type ExtracterInput = E::Input;
-    async fn sniffer_parallel<M: Fn(&D) -> Vec<String> + Send>(
-        &self,
-        f: M,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    type Input = Arxiv;
+    type Output = ArxivTopicData;
+    async fn sniffer_parallel(&self) -> Result<Vec<(Self::Input, Self::Output)>, Box<dyn Error>> {
         let fetched_data = self
             .fetcher
             .fetch()
@@ -68,7 +62,7 @@ where
         let mut futures = FuturesUnordered::new();
         for ctx in fetched_data.iter() {
             let extracter = &self.extracter;
-            futures.push(async move { (ctx.clone(), extracter.extract::<D>(&ctx).await) });
+            futures.push(async move { (ctx.clone(), extracter.extract(&ctx).await) });
         }
 
         let mut res = Vec::new();
@@ -83,19 +77,6 @@ where
             }
         }
 
-        let trending_res = self.analyzer.top_k(&res, f);
-
-        println!("{:#?}", trending_res);
-        for (i, (keyword, papers)) in trending_res.iter().enumerate() {
-            println!("HOT {}: {}", i, keyword);
-            println!("[");
-            for p in papers {
-                println!("\tid={}", p.id);
-                println!("\ttitle={}", p.title);
-            }
-            println!("]");
-        }
-
-        Ok(())
+        Ok(res)
     }
 }
