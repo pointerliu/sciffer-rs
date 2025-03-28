@@ -44,3 +44,9 @@ cargo run --bin sciffer_cli -- --num 3 --query "machine learning"
 - `--query "machine learning"`: Specifies the search query. Replace `"machine learning"` with any other search term you want.
 
 This will fetch the latest results for the given query and display them in the terminal.
+
+### Sciffer Server
+
+```bash
+cargo run --bin sciffer_server -- --num 3 --query "machine learning"
+```
