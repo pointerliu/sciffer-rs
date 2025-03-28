@@ -4,7 +4,6 @@ use std::{
 };
 
 use langchain_rust::chain::ChainError;
-use serde::de::DeserializeOwned;
 
 pub mod topic;
 

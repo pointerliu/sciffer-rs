@@ -1,5 +1,5 @@
 use crate::models::Keyword;
-use sqlx::{query, query_as, SqlitePool};
+use sqlx::{query, SqlitePool};
 
 pub struct KeywordDAO;
 

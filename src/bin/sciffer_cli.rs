@@ -4,7 +4,6 @@ use langchain_rust::language_models::llm::LLM;
 use langchain_rust::llm::{client::Ollama, OpenAI};
 use langchain_rust::tools::OpenAIConfig;
 use sciffer_rs::{
-    analyzers::simple::SimpleArixvTrendingAnalyzerBuilder,
     extracters::topic::TopicExtracterBuilder,
     fetchers::arxiv::ArxivFetcherBuilder,
     sciffer::{ArxivScifferBuilder, Sniffer},

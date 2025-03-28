@@ -112,7 +112,7 @@ where
                     .iter()
                     .map(|(meta, ext_meta)| {
                         let meta = meta.clone();
-                        let ext_meta = ext_meta.clone();
+                        let ext_meta = ext_meta;
                         let paper = Paper {
                             id: 0,
                             title: meta.title,

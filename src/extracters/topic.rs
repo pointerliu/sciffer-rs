@@ -10,7 +10,7 @@ use langchain_rust::{
     prompt::{FormatPrompter, HumanMessagePromptTemplate},
     prompt_args, template_fstring,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::{agent::AgentApp, tools::parser::parse_json_md};
 

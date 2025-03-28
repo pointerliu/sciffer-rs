@@ -5,10 +5,9 @@ use langchain_rust::llm::{client::Ollama, OpenAI};
 use langchain_rust::tools::OpenAIConfig;
 use sciffer_rs::sciffer::SnifferServer;
 use sciffer_rs::{
-    analyzers::simple::SimpleArixvTrendingAnalyzerBuilder,
     extracters::topic::TopicExtracterBuilder,
     fetchers::arxiv::ArxivFetcherBuilder,
-    sciffer::{ArxivScifferBuilder, Sniffer},
+    sciffer::ArxivScifferBuilder,
 };
 use std::env;
 

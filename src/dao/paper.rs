@@ -1,5 +1,5 @@
 use crate::models::Paper;
-use sqlx::{query, query_as, SqlitePool};
+use sqlx::{query, SqlitePool};
 
 pub struct PaperDAO;
 
@@ -24,29 +24,5 @@ impl PaperDAO {
             .fetch_one(pool)
             .await?;
         Ok(id.id)
-    }
-
-    // Retrieve all papers
-    pub async fn get_all_papers(pool: &SqlitePool) -> Result<Vec<Paper>, sqlx::Error> {
-        let papers = query_as!(Paper, "SELECT * FROM papers")
-            .fetch_all(pool)
-            .await?;
-        Ok(papers)
-    }
-
-    // Retrieve a paper by ID
-    pub async fn get_paper_by_id(pool: &SqlitePool, id: i32) -> Result<Option<Paper>, sqlx::Error> {
-        let paper = query_as!(Paper, "SELECT * FROM papers WHERE id = ?", id)
-            .fetch_optional(pool)
-            .await?;
-        Ok(paper)
-    }
-
-    // Delete a paper by ID
-    pub async fn delete_paper(pool: &SqlitePool, id: i32) -> Result<(), sqlx::Error> {
-        query!("DELETE FROM papers WHERE id = ?", id)
-            .execute(pool)
-            .await?;
-        Ok(())
     }
 }

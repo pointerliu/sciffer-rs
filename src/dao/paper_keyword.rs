@@ -1,6 +1,6 @@
 use crate::dao::{KeywordDAO, PaperDAO};
-use crate::models::{Keyword, Paper, PaperKeyword};
-use sqlx::{query, query_as, SqlitePool};
+use crate::models::{Keyword, Paper};
+use sqlx::{query, SqlitePool};
 
 pub struct PaperKeywordDAO;
 
