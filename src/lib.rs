@@ -8,3 +8,4 @@ mod models;
 pub mod sciffer;
 pub mod tools;
 pub mod log;
+pub mod config;
