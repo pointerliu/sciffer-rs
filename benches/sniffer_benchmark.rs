@@ -12,7 +12,7 @@ use sciffer_rs::{
 
 use tokio::runtime::Runtime;
 
-fn setup_sciffer() -> ArxivSciffer<ArxivFetcher, TopicExtracter, SimpleArixvTrendingAnalyzer> {
+fn setup_sciffer() -> ArxivSciffer<ArxivFetcher, TopicExtracter> {
     let _ = dotenv::dotenv();
     let fetcher = ArxivFetcherBuilder::default()
         .query("machine learning".to_string())
@@ -51,15 +51,7 @@ fn benchmark_sniffer(c: &mut Criterion) {
     let runtime = Runtime::new().unwrap();
     group.bench_function("sniffer_parallel", |b| {
         b.iter(|| {
-            runtime.block_on(async {
-                sciffer
-                    .sniffer_parallel(|ctx| {
-                        // ctx.solved_problem.clone()
-                        ctx.research_field.clone()
-                    })
-                    .await
-                    .unwrap();
-            });
+            runtime.block_on(async { sciffer.sniffer_parallel().await.unwrap() });
         })
     });
 }
