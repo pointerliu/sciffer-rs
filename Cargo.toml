@@ -20,7 +20,9 @@ clap = { version = "4.5.29", features = ["derive"] }
 sqlx = { version = "0.8.3", features = ["sqlite", "runtime-tokio", "tls-native-tls"] }
 async-trait = "0.1.86"
 chrono = "0.4.40"
-log = "0.4.25"
+log = "0.4.27"
+pretty_env_logger = "0.5.0"
+flexi_logger = "0.30.0"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["async_futures"] }

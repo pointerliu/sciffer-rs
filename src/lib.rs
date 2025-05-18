@@ -7,3 +7,4 @@ pub mod fetchers;
 mod models;
 pub mod sciffer;
 pub mod tools;
+pub mod log;
