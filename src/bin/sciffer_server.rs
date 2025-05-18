@@ -3,13 +3,14 @@ use clap::Parser;
 use langchain_rust::language_models::llm::LLM;
 use langchain_rust::llm::{client::Ollama, OpenAI};
 use langchain_rust::tools::OpenAIConfig;
+use sciffer_rs::config::load_config;
+use sciffer_rs::log::init_logger;
 use sciffer_rs::sciffer::SnifferServer;
 use sciffer_rs::{
     extracters::topic::TopicExtracterBuilder, fetchers::arxiv::ArxivFetcherBuilder,
     sciffer::ArxivScifferBuilder,
 };
 use std::env;
-use sciffer_rs::log::init_logger;
 
 #[derive(Parser)]
 struct Args {
@@ -34,6 +35,7 @@ async fn main() {
     init_logger();
     let _ = dotenv::dotenv();
     let args = Args::parse();
+    let cfg = load_config();
 
     let fetcher = ArxivFetcherBuilder::default()
         .query(args.query)
@@ -66,6 +68,7 @@ async fn main() {
     let sciffer = ArxivScifferBuilder::default()
         .fetcher(fetcher)
         .extracter(extracter)
+        .config(cfg)
         .build()
         .unwrap();
 
