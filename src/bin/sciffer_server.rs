@@ -9,6 +9,7 @@ use sciffer_rs::{
     sciffer::ArxivScifferBuilder,
 };
 use std::env;
+use sciffer_rs::log::init_logger;
 
 #[derive(Parser)]
 struct Args {
@@ -30,6 +31,7 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
+    init_logger();
     let _ = dotenv::dotenv();
     let args = Args::parse();
 
