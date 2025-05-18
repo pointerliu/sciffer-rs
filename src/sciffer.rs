@@ -1,3 +1,4 @@
+use crate::config::ScifferConfig;
 use crate::dao::add_paper_with_keywords;
 use crate::extracters::topic::ArxivTopicData;
 use crate::models::{Keyword, Paper};
@@ -55,6 +56,7 @@ pub trait SnifferServer: Sniffer {
 pub struct ArxivSciffer<F, E> {
     fetcher: F,
     extracter: E,
+    config: ScifferConfig,
 }
 
 impl<F, E> Sniffer for ArxivSciffer<F, E>
@@ -141,7 +143,7 @@ where
                 }
 
                 info!("add papers finished @ {}: {:?}", date_str, res);
-                sleep(Duration::from_secs(5)).await;
+                sleep(Duration::from_secs(self.config.time_interval)).await;
             }
         }
     }
