@@ -19,7 +19,7 @@ use super::{Extracter, ExtracterError};
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct TopicExtracter {
-    #[builder(default="prompts/topic.pt".to_string())]
+    #[builder(default="prompts/topic.md".to_string())]
     prompt: String,
     llm: Box<dyn LLM>,
 }
@@ -37,7 +37,7 @@ impl Default for TopicExtracter {
     fn default() -> Self {
         let llm = Ollama::default().with_model("llama3.2:3b");
         Self {
-            prompt: "prompts/topic.pt".to_string(),
+            prompt: "prompts/topic.md".to_string(),
             llm: Box::new(llm),
         }
     }

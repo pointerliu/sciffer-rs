@@ -25,7 +25,7 @@ struct Args {
         default_value = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
     )]
     model: String,
-    #[arg(short, long, default_value = "prompts/topic.pt")]
+    #[arg(short, long, default_value = "prompts/topic.md")]
     prompt: String,
 }
 
